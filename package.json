@@ -1,0 +1,68 @@
+{
+  "name": "israel-vehicle-open-data",
+  "version": "0.1.0",
+  "description": "JavaScript/TypeScript access to Israeli vehicle open data on data.gov.il via CKAN datastore_search",
+  "license": "MIT",
+  "author": "Nir Tatcher",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NirTatcher/israel-vehicle-open-data.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NirTatcher/israel-vehicle-open-data/issues"
+  },
+  "homepage": "https://github.com/NirTatcher/israel-vehicle-open-data#readme",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "israel",
+    "vehicle",
+    "cars",
+    "data.gov.il",
+    "ckan",
+    "open-data",
+    "license-plate",
+    "typescript",
+    "javascript"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-jsdoc": "^61.1.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vitest": "^4.0.8"
+  }
+}

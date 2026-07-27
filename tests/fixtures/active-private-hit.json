@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "result": {
+    "include_total": true,
+    "limit": 1,
+    "offset": 0,
+    "records_format": "objects",
+    "resource_id": "053cea08-09bc-40ec-8f7a-156f0677aff3",
+    "total": 1,
+    "total_estimation_threshold": null,
+    "records": [
+      {
+        "_id": 1,
+        "mispar_rechev": 3300421,
+        "tozeret_nm": "טויוטה",
+        "degem_nm": "קורולה"
+      }
+    ]
+  }
+}
