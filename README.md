@@ -20,9 +20,9 @@ Requires **Node.js 18+** (uses native `fetch`).
 
 Package: [npmjs.com/package/israel-vehicle-open-data](https://www.npmjs.com/package/israel-vehicle-open-data) · Source: [github.com/NirTatcher/israel-vehicle-open-data](https://github.com/NirTatcher/israel-vehicle-open-data)
 
-## Used by
+## Example
 
-- **[Car check](https://car-check-il.netlify.app/)** — open-source Israeli license plate lookup ([source](https://github.com/NirTatcher/car-check))
+**[Car check](https://car-check-il.netlify.app/)** — a live license plate lookup showing what you can build with this library (registry, recalls, mileage, ownership, and more).
 
 If this package helps you, consider **[giving the repo a star](https://github.com/NirTatcher/israel-vehicle-open-data/stargazers)** — it helps others discover it.
 
@@ -265,7 +265,7 @@ Each `RESOURCES` key maps to a CKAN `resource_id`. Links point to the dataset pa
 
 - [data.gov.il](https://data.gov.il) — Israeli open data portal
 - [CKAN `datastore_search` API](https://data.gov.il/api/3/action/datastore_search)
-- [Car check](https://car-check-il.netlify.app/) — demo app using this library
+- [Car check](https://car-check-il.netlify.app/) — live example built with this library
 
 ## Development
 
