@@ -1,12 +1,10 @@
 # israel-vehicle-open-data
 
 [![npm version](https://img.shields.io/npm/v/israel-vehicle-open-data)](https://www.npmjs.com/package/israel-vehicle-open-data)
-[![npm downloads/month](https://img.shields.io/npm/dm/israel-vehicle-open-data)](https://www.npmjs.com/package/israel-vehicle-open-data)
-[![npm downloads total](https://img.shields.io/npm/dt/israel-vehicle-open-data)](https://www.npmjs.com/package/israel-vehicle-open-data)
-[![CI](https://github.com/NirTatcher/israel-vehicle-open-data/actions/workflows/ci.yml/badge.svg)](https://github.com/NirTatcher/israel-vehicle-open-data/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/NirTatcher/israel-vehicle-open-data?style=social)](https://github.com/NirTatcher/israel-vehicle-open-data/stargazers)
-[![repo views](https://komarev.com/ghpvc/?username=NirTatcher&repo=israel-vehicle-open-data&label=views&color=0e75b6)](https://github.com/NirTatcher/israel-vehicle-open-data)
+
+![npm](https://img.shields.io/npm/dw/israel-vehicle-open-data) &nbsp;&nbsp; ![npm](https://img.shields.io/npm/dm/israel-vehicle-open-data) &nbsp;&nbsp; ![npm](https://img.shields.io/npm/dy/israel-vehicle-open-data)
+
+[![CI](https://github.com/NirTatcher/israel-vehicle-open-data/actions/workflows/ci.yml/badge.svg)](https://github.com/NirTatcher/israel-vehicle-open-data/actions/workflows/ci.yml) &nbsp;&nbsp; [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) &nbsp;&nbsp; [![repo views](https://komarev.com/ghpvc/?username=NirTatcher&repo=israel-vehicle-open-data&label=views&color=0e75b6)](https://github.com/NirTatcher/israel-vehicle-open-data) &nbsp;&nbsp; [![GitHub stars](https://img.shields.io/github/stars/NirTatcher/israel-vehicle-open-data?style=social)](https://github.com/NirTatcher/israel-vehicle-open-data/stargazers)
 
 JavaScript/TypeScript library for querying Israeli vehicle datasets on [data.gov.il](https://data.gov.il) via CKAN [`datastore_search`](https://data.gov.il/api/3/action/datastore_search). Ships typed responses, resource IDs, and query helpers for common lookups.
 
@@ -69,6 +67,133 @@ searchActivePrivateByPlate(3300421).then((response) => {
 ```
 
 Pass an optional `AbortSignal` as the last argument on any query to cancel in-flight requests.
+
+## Full plate lookup (all datasets)
+
+There is no single API call for “everything about a car”. A full lookup (as used by [Car check](https://car-check-il.netlify.app/)) typically:
+
+1. **Resolve the vehicle** — try active private registry first; if empty, check public → personal import → inactive → final cancel (in parallel).
+2. **By plate (always)** — outstanding recalls (`searchHagbalatRecallByPlate`).
+3. **By plate (when a record exists)** — disabled parking permit, mileage history, ownership history.
+4. **By model codes from the record** (`tozeret_cd`, `degem_cd`, optional `shnat_yitzur`, `sug_degem`) — WLTP specs, model popularity counts.
+5. **By recall IDs** — for each hagbalat row, fetch recall catalog details (`searchRecallCatalogByRecallId`).
+
+```js
+import {
+  searchActivePrivateByPlate,
+  searchPublicVehicleByPlate,
+  searchPersonalImportByPlate,
+  searchInactiveWithModelByPlate,
+  searchInactiveWithoutModelByPlate,
+  searchFinalCancelByPlate,
+  searchHagbalatRecallByPlate,
+  searchDisabledParkingPermitByPlate,
+  searchPrivateHistoryMileageByPlate,
+  searchPrivateOwnershipByPlate,
+  searchWltpByModel,
+  searchActivePrivateByModel,
+  searchActivePrivateByModelYear,
+  searchRecallCatalogByRecallId,
+} from 'israel-vehicle-open-data'
+
+const plate = 3300421
+
+function first(response) {
+  return response.success && response.result?.records[0]
+    ? response.result.records[0]
+    : null
+}
+
+// 1. Resolve registry (simplified — see example script for full priority logic)
+let vehicle = first(await searchActivePrivateByPlate(plate))
+let source = vehicle ? 'active-private' : null
+
+if (!vehicle) {
+  const [pub, imp, inM, inNo, fin] = await Promise.all([
+    searchPublicVehicleByPlate(plate).then(first),
+    searchPersonalImportByPlate(plate).then(first),
+    searchInactiveWithModelByPlate(plate).then(first),
+    searchInactiveWithoutModelByPlate(plate).then(first),
+    searchFinalCancelByPlate(plate).then(first),
+  ])
+  if (pub) { vehicle = pub; source = 'public' }
+  else if (imp) { vehicle = imp; source = 'personal-import' }
+  else if (inM) { vehicle = inM; source = 'inactive-with-model' }
+  else if (inNo) { vehicle = inNo; source = 'inactive-without-model' }
+  else if (fin) { vehicle = fin; source = 'inactive-final-cancel' }
+}
+
+// 2. Recalls by plate (always)
+const hagbalat = await searchHagbalatRecallByPlate(plate)
+const recallRows = hagbalat.success ? hagbalat.result.records : []
+
+let disabledPermit = null
+let mileage = null
+let ownership = []
+let wltp = null
+let modelTotal = null
+let modelYearTotal = null
+
+if (vehicle) {
+  const { tozeret_cd, degem_cd, shnat_yitzur, sug_degem } = vehicle
+
+  ;[disabledPermit, mileage, ownership] = await Promise.all([
+    searchDisabledParkingPermitByPlate(plate).then(first),
+    searchPrivateHistoryMileageByPlate(plate).then(first),
+    searchPrivateOwnershipByPlate(plate).then((r) =>
+      r.success ? r.result.records : [],
+    ),
+  ])
+
+  if (typeof tozeret_cd === 'number' && typeof degem_cd === 'number') {
+    const [wltpRes, countRes, yearRes] = await Promise.all([
+      searchWltpByModel({
+        tozeret_cd,
+        degem_cd,
+        shnat_yitzur: typeof shnat_yitzur === 'number' ? shnat_yitzur : undefined,
+        sug_degem: typeof sug_degem === 'string' ? sug_degem : undefined,
+      }),
+      searchActivePrivateByModel({ tozeret_cd, degem_cd }),
+      typeof shnat_yitzur === 'number'
+        ? searchActivePrivateByModelYear({ tozeret_cd, degem_cd, shnat_yitzur })
+        : Promise.resolve(null),
+    ])
+    wltp = first(wltpRes)
+    modelTotal = countRes.success ? countRes.result.total : null
+    modelYearTotal = yearRes?.success ? yearRes.result.total : null
+  }
+}
+
+// 3. Recall catalog for each outstanding recall
+const recallCatalog = await Promise.all(
+  recallRows.map((row) =>
+    searchRecallCatalogByRecallId(row.RECALL_ID).then(first),
+  ),
+)
+
+console.log({
+  plate,
+  source,
+  vehicle,
+  recallRows,
+  recallCatalog: recallCatalog.filter(Boolean),
+  disabledPermit,
+  mileage,
+  ownership,
+  wltp,
+  modelTotal,
+  modelYearTotal,
+})
+```
+
+**Runnable script:** [`examples/full-plate-lookup.mjs`](examples/full-plate-lookup.mjs)
+
+```bash
+npm run build
+node examples/full-plate-lookup.mjs 3300421
+```
+
+Each response is a CKAN envelope — check `response.success` before reading `response.result`. The example script prints aggregated JSON for debugging.
 
 ## How it works
 

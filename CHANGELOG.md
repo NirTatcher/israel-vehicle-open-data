@@ -9,8 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- README: badges (npm version, downloads, CI, license, GitHub stars, repo views)
+- README: badges on separate rows (npm dw/dm/dy like tranzilajs, stars last)
 - README: dataset links on data.gov.il, Car check demo link, related links section
+- README: full plate lookup example (all query helpers for one plate)
+- Added `examples/full-plate-lookup.mjs` runnable script
 
 ## [0.1.0] - 2026-07-27
 
