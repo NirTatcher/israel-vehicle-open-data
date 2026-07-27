@@ -1,6 +1,14 @@
 # israel-vehicle-open-data
 
-JavaScript/TypeScript library for querying Israeli vehicle datasets on [data.gov.il](https://data.gov.il) via CKAN `datastore_search`. Ships typed responses, resource IDs, and query helpers for common lookups.
+[![npm version](https://img.shields.io/npm/v/israel-vehicle-open-data)](https://www.npmjs.com/package/israel-vehicle-open-data)
+[![npm downloads/month](https://img.shields.io/npm/dm/israel-vehicle-open-data)](https://www.npmjs.com/package/israel-vehicle-open-data)
+[![npm downloads total](https://img.shields.io/npm/dt/israel-vehicle-open-data)](https://www.npmjs.com/package/israel-vehicle-open-data)
+[![CI](https://github.com/NirTatcher/israel-vehicle-open-data/actions/workflows/ci.yml/badge.svg)](https://github.com/NirTatcher/israel-vehicle-open-data/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/NirTatcher/israel-vehicle-open-data?style=social)](https://github.com/NirTatcher/israel-vehicle-open-data/stargazers)
+[![repo views](https://komarev.com/ghpvc/?username=NirTatcher&repo=israel-vehicle-open-data&label=views&color=0e75b6)](https://github.com/NirTatcher/israel-vehicle-open-data)
+
+JavaScript/TypeScript library for querying Israeli vehicle datasets on [data.gov.il](https://data.gov.il) via CKAN [`datastore_search`](https://data.gov.il/api/3/action/datastore_search). Ships typed responses, resource IDs, and query helpers for common lookups.
 
 > **Disclaimer:** Unofficial community library — not affiliated with Israel's Ministry of Transport. Data may be incomplete or delayed. Does **not** cover stolen-vehicle status, insurance, liens, or non-public records.
 
@@ -11,6 +19,14 @@ npm install israel-vehicle-open-data
 ```
 
 Requires **Node.js 18+** (uses native `fetch`).
+
+Package: [npmjs.com/package/israel-vehicle-open-data](https://www.npmjs.com/package/israel-vehicle-open-data) · Source: [github.com/NirTatcher/israel-vehicle-open-data](https://github.com/NirTatcher/israel-vehicle-open-data)
+
+## Used by
+
+- **[Car check](https://car-check-il.netlify.app/)** — open-source Israeli license plate lookup ([source](https://github.com/NirTatcher/car-check))
+
+If this package helps you, consider **[giving the repo a star](https://github.com/NirTatcher/israel-vehicle-open-data/stargazers)** — it helps others discover it.
 
 ## JavaScript & TypeScript
 
@@ -101,21 +117,30 @@ await datastoreSearch({
 })
 ```
 
-## Resource IDs (`RESOURCES`)
+## Datasets (`RESOURCES`)
 
-| Key | Purpose |
-|-----|---------|
-| `activePrivate` | Active private vehicle registry |
-| `publicVehicles` | Public / government vehicles |
-| `personalImport` | Personal import registry |
-| `inactiveWithModel` / `inactiveWithoutModel` | Inactive vehicles |
-| `finalCancel` | Final cancellation |
-| `hagbalatRecall` | Outstanding safety recalls by plate |
-| `recallCatalog` | RECALL campaign catalog |
-| `wltp` | WLTP / technical specs |
-| `privateHistoryMileage` | Last reported mileage |
-| `privateOwnership` | Ownership history |
-| `disabledParkingPermit` | Disabled parking permit tag |
+Each `RESOURCES` key maps to a CKAN `resource_id`. Links point to the dataset page on data.gov.il (Ministry of Transport).
+
+| Key | `resource_id` | Dataset on data.gov.il |
+|-----|---------------|------------------------|
+| `activePrivate` | `053cea08-09bc-40ec-8f7a-156f0677aff3` | [private-and-commercial-vehicles](https://data.gov.il/he/datasets/ministry_of_transport/private-and-commercial-vehicles) |
+| `publicVehicles` | `cf29862d-ca25-4691-84f6-1be60dcb4a1e` | [kli_rechev_ciburiim](https://data.gov.il/he/datasets/ministry_of_transport/kli_rechev_ciburiim) |
+| `personalImport` | `03adc637-b6fe-402b-9937-7c3d3afc9140` | [personal_import_vehicles](https://data.gov.il/he/datasets/ministry_of_transport/personal_import_vehicles) |
+| `inactiveWithModel` | `f6efe89a-fb3d-43a4-bb61-9bf12a9b9099` | [rechev_le_pail_with_degem](https://data.gov.il/he/datasets/ministry_of_transport/rechev_le_pail_with_degem) |
+| `inactiveWithoutModel` | `6f6acd03-f351-4a8f-8ecf-df792f4f573a` | [rechev_le_pail_without-degem](https://data.gov.il/he/datasets/ministry_of_transport/rechev_le_pail_without-degem) |
+| `finalCancel` | `851ecab1-0622-4dbe-a6c7-f950cf82abf9` | [reshev_bitul_sofi](https://data.gov.il/he/datasets/ministry_of_transport/reshev_bitul_sofi) |
+| `disabledParkingPermit` | `c8b9f9c8-4612-4068-934f-d4acd2e3c06e` | [rechev-tag-nachim](https://data.gov.il/he/datasets/ministry_of_transport/rechev-tag-nachim) |
+| `hagbalatRecall` | `36bf1404-0be4-49d2-82dc-2f1ead4a8b93` | [hagbalat_recall](https://data.gov.il/he/datasets/ministry_of_transport/hagbalat_recall) |
+| `recallCatalog` | `2c33523f-87aa-44ec-a736-edbb0a82975e` | [recall](https://data.gov.il/he/datasets/ministry_of_transport/recall) |
+| `wltp` | `142afde2-6228-49f9-8a29-9b6c3a0cbe40` | [degem-rechev-wltp](https://data.gov.il/he/datasets/ministry_of_transport/degem-rechev-wltp) |
+| `privateHistoryMileage` | `56063a99-8a3e-4ff4-912e-5966c0279bad` | [shinui_mivne](https://data.gov.il/he/datasets/ministry_of_transport/shinui_mivne) (mileage resource) |
+| `privateOwnership` | `bb2355dc-9ec7-4f06-9c3f-3344672171da` | [shinui_mivne](https://data.gov.il/he/datasets/ministry_of_transport/shinui_mivne) (ownership resource) |
+
+## Related links
+
+- [data.gov.il](https://data.gov.il) — Israeli open data portal
+- [CKAN `datastore_search` API](https://data.gov.il/api/3/action/datastore_search)
+- [Car check](https://car-check-il.netlify.app/) — demo app using this library
 
 ## Development
 
