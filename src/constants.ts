@@ -21,6 +21,8 @@ export const RESOURCES = {
   recallCatalog: '2c33523f-87aa-44ec-a736-edbb0a82975e',
   /** Outstanding recall compliance by plate (משרד התחבורה). */
   hagbalatRecall: '36bf1404-0be4-49d2-82dc-2f1ead4a8b93',
+  /** Active two-wheeled vehicles (motorcycles, scooters, trikes). */
+  twoWheelers: 'bf9df4e2-d90d-4c0a-a400-19e15af8e95f',
 } as const
 
 export type ResourceKey = keyof typeof RESOURCES

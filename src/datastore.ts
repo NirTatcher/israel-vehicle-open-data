@@ -8,6 +8,8 @@ export type DatastoreSearchParams = {
   filters?: string
   sort?: string
   q?: string
+  /** Comma-separated field names to return (CKAN `fields`). */
+  fields?: string
 }
 
 /**

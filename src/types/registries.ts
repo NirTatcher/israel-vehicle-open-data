@@ -115,3 +115,22 @@ export type PersonalImportVehicleRecord = {
 
   [key: string]: unknown
 }
+
+export type TwoWheelerRecord = {
+  _id: number
+  mispar_rechev: number
+  tozeret_cd: number | null
+  tozeret_nm: string | null
+  tozeret_eretz_nm: string | null
+  degem_nm: string | null
+  shnat_yitzur: number | null
+  sug_delek_nm: string | null
+  sug_rechev_cd: number | null
+  sug_rechev_nm: string | null
+  nefach_manoa: number | null
+  misgeret: string | null
+  moed_aliya_lakvish: string | null
+  baalut: string | null
+
+  [key: string]: unknown
+}

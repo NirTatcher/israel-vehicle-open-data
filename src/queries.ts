@@ -15,6 +15,7 @@ import type {
   InactiveVehicleWithoutModelRecord,
   PersonalImportVehicleRecord,
   PublicVehicleRecord,
+  TwoWheelerRecord,
 } from './types/registries.js'
 
 type SearchOpts = {
@@ -149,6 +150,14 @@ export function searchPublicVehicleByPlate(
   signal?: AbortSignal,
 ): Promise<DatastoreSearchResponse<PublicVehicleRecord>> {
   return searchByPlate<PublicVehicleRecord>(RESOURCES.publicVehicles, plate, signal)
+}
+
+/** Active two-wheeled vehicle registry by plate. */
+export function searchTwoWheelersByPlate(
+  plate: number,
+  signal?: AbortSignal,
+): Promise<DatastoreSearchResponse<TwoWheelerRecord>> {
+  return searchByPlate<TwoWheelerRecord>(RESOURCES.twoWheelers, plate, signal)
 }
 
 /** Personal import registry by plate. */

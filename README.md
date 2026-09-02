@@ -205,6 +205,9 @@ Responses match the official CKAN JSON shape (`success`, `result`, `error`). The
 |--------|-------------|
 | `datastoreSearch(params, signal?)` | Any `datastore_search` call → `DatastoreSearchResponse<T>` |
 | `buildDatastoreSearchUrl(params)` | URL builder (encodes `filters` once — do not pre-encode JSON) |
+| `paginateDatastore(resource_id, opts?)` | Async generator over CKAN pages (`limit`, `offset`, `fields`, `maxPages`) |
+| `paginateActivePrivate(opts?)` | Same for `RESOURCES.activePrivate` |
+| `paginateTwoWheelers(opts?)` | Same for `RESOURCES.twoWheelers` |
 | `DATASTORE_SEARCH_URL` | Base CKAN endpoint URL |
 | `RESOURCES` | Known dataset resource IDs |
 
@@ -242,6 +245,21 @@ await datastoreSearch({
 })
 ```
 
+Scan an entire registry (e.g. for batch stats):
+
+```js
+import { paginateActivePrivate } from 'israel-vehicle-open-data'
+
+let total = 0
+for await (const page of paginateActivePrivate({ limit: 32_000 })) {
+  for (const record of page.records) {
+    // aggregate …
+  }
+  total += page.records.length
+  if (page.total !== null) console.log(`${total} / ${page.total}`)
+}
+```
+
 ## Datasets (`RESOURCES`)
 
 Each `RESOURCES` key maps to a CKAN `resource_id`. Links point to the dataset page on data.gov.il (Ministry of Transport).
@@ -260,6 +278,7 @@ Each `RESOURCES` key maps to a CKAN `resource_id`. Links point to the dataset pa
 | `wltp` | `142afde2-6228-49f9-8a29-9b6c3a0cbe40` | [degem-rechev-wltp](https://data.gov.il/he/datasets/ministry_of_transport/degem-rechev-wltp) |
 | `privateHistoryMileage` | `56063a99-8a3e-4ff4-912e-5966c0279bad` | [shinui_mivne](https://data.gov.il/he/datasets/ministry_of_transport/shinui_mivne) (mileage resource) |
 | `privateOwnership` | `bb2355dc-9ec7-4f06-9c3f-3344672171da` | [shinui_mivne](https://data.gov.il/he/datasets/ministry_of_transport/shinui_mivne) (ownership resource) |
+| `twoWheelers` | `bf9df4e2-d90d-4c0a-a400-19e15af8e95f` | [two-wheeled vehicles](https://data.gov.il/he/datasets/ministry_of_transport/two-wheeled-vehicles) |
 
 ## Related links
 

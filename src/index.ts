@@ -11,6 +11,14 @@ export {
 } from './datastore.js'
 
 export {
+  paginateActivePrivate,
+  paginateDatastore,
+  paginateTwoWheelers,
+  type PaginateDatastoreOpts,
+  type PaginatePage,
+} from './pagination.js'
+
+export {
   searchActivePrivate,
   searchActivePrivateByPlate,
   searchActivePrivateByModel,
@@ -19,6 +27,7 @@ export {
   searchPrivateHistoryMileageByPlate,
   searchPrivateOwnershipByPlate,
   searchPublicVehicleByPlate,
+  searchTwoWheelersByPlate,
   searchPersonalImportByPlate,
   searchInactiveWithModelByPlate,
   searchInactiveWithoutModelByPlate,

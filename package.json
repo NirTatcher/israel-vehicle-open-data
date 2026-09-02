@@ -1,6 +1,6 @@
 {
   "name": "israel-vehicle-open-data",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "JavaScript/TypeScript access to Israeli vehicle open data on data.gov.il via CKAN datastore_search",
   "license": "MIT",
   "author": "Nir Tatcher",
