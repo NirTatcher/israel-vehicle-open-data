@@ -18,6 +18,15 @@ function pageResponse(records: object[], total: number, offset: number) {
   }
 }
 
+function jsonResponse(body: unknown, status = 200) {
+  const text = JSON.stringify(body)
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    text: async () => text,
+  }
+}
+
 describe('paginateDatastore', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
@@ -35,11 +44,7 @@ describe('paginateDatastore', () => {
             : offset === 2
               ? [{ mispar_rechev: 3 }]
               : []
-        return {
-          ok: true,
-          status: 200,
-          json: async () => pageResponse(records, 3, offset),
-        }
+        return jsonResponse(pageResponse(records, 3, offset))
       }),
     )
 
@@ -57,12 +62,9 @@ describe('paginateDatastore', () => {
   it('respects maxPages', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
-        ok: true,
-        status: 200,
-        json: async () =>
-          pageResponse([{ mispar_rechev: 1 }, { mispar_rechev: 2 }], 10, 0),
-      })),
+      vi.fn(async () =>
+        jsonResponse(pageResponse([{ mispar_rechev: 1 }, { mispar_rechev: 2 }], 10, 0)),
+      ),
     )
 
     const pages = []
@@ -79,14 +81,12 @@ describe('paginateDatastore', () => {
   it('throws when CKAN returns success=false', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
-        ok: true,
-        status: 200,
-        json: async () => ({
+      vi.fn(async () =>
+        jsonResponse({
           success: false,
           error: { message: 'boom' },
         }),
-      })),
+      ),
     )
 
     const gen = paginateDatastore(RESOURCES.activePrivate)

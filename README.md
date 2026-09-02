@@ -220,7 +220,7 @@ For **batch scans** (stats, exports), use `paginateDatastore(resource_id, opts)`
 
 ## How it works
 
-Responses match the official CKAN JSON shape (`success`, `result`, `error`). The library does not retry failed requests, throw on `success: false`, or unwrap records — you handle the envelope the same way you would with a direct API call.
+Responses match the official CKAN JSON shape (`success`, `result`, `error`). The library does not throw on CKAN `success: false` or unwrap records — you handle the envelope the same way you would with a direct API call. Transient HTTP failures (429, 5xx, HTML gateway pages) are retried with backoff.
 
 ### Core API
 

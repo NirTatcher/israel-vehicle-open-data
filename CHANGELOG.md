@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-09-02
+
+### Changed
+
+- `datastoreSearch` retries transient HTTP failures (429, 5xx, HTML gateway pages, empty bodies) with backoff instead of crashing on `JSON.parse`
+
 ## [1.1.0] - 2026-09-02
 
 ### Added
@@ -43,6 +49,7 @@ First stable release.
 
 Initial npm publish (superseded by 1.0.0 — same API).
 
+[1.1.1]: https://github.com/NirTatcher/israel-vehicle-open-data/releases/tag/v1.1.1
 [1.1.0]: https://github.com/NirTatcher/israel-vehicle-open-data/releases/tag/v1.1.0
 [1.0.0]: https://github.com/NirTatcher/israel-vehicle-open-data/releases/tag/v1.0.0
 [0.1.0]: https://github.com/NirTatcher/israel-vehicle-open-data/releases/tag/v0.1.0

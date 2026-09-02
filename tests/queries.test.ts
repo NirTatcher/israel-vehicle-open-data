@@ -13,7 +13,7 @@ describe('searchActivePrivateByPlate', () => {
       vi.fn(async () => ({
         ok: true,
         status: 200,
-        json: async () => fixture,
+        text: async () => JSON.stringify(fixture),
       })),
     )
 
