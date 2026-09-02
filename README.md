@@ -1,10 +1,10 @@
 # israel-vehicle-open-data
 
-[![npm version](https://img.shields.io/npm/v/israel-vehicle-open-data)](https://www.npmjs.com/package/israel-vehicle-open-data) &nbsp;&nbsp; [![GitHub release](https://img.shields.io/github/v/release/NirTatcher/israel-vehicle-open-data)](https://github.com/NirTatcher/israel-vehicle-open-data/releases)
+[![npm version](https://img.shields.io/npm/v/israel-vehicle-open-data)](https://www.npmjs.com/package/israel-vehicle-open-data)
 
 ![npm](https://img.shields.io/npm/dw/israel-vehicle-open-data) &nbsp;&nbsp; ![npm](https://img.shields.io/npm/dm/israel-vehicle-open-data) &nbsp;&nbsp; ![npm](https://img.shields.io/npm/dy/israel-vehicle-open-data)
 
-[![CI](https://github.com/NirTatcher/israel-vehicle-open-data/actions/workflows/ci.yml/badge.svg)](https://github.com/NirTatcher/israel-vehicle-open-data/actions/workflows/ci.yml) &nbsp;&nbsp; [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) &nbsp;&nbsp; [![repo views](https://komarev.com/ghpvc/?username=NirTatcher&repo=israel-vehicle-open-data&label=views&color=0e75b6)](https://github.com/NirTatcher/israel-vehicle-open-data) &nbsp;&nbsp; [![GitHub stars](https://img.shields.io/github/stars/NirTatcher/israel-vehicle-open-data?style=social)](https://github.com/NirTatcher/israel-vehicle-open-data/stargazers)
+[![CI](https://github.com/NirTatcher/israel-vehicle-open-data/actions/workflows/ci.yml/badge.svg)](https://github.com/NirTatcher/israel-vehicle-open-data/actions/workflows/ci.yml) &nbsp;&nbsp; [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) &nbsp;&nbsp; [![GitHub stars](https://img.shields.io/github/stars/NirTatcher/israel-vehicle-open-data?style=social)](https://github.com/NirTatcher/israel-vehicle-open-data/stargazers)
 
 JavaScript/TypeScript library for querying Israeli vehicle datasets on [data.gov.il](https://data.gov.il) via CKAN [`datastore_search`](https://data.gov.il/api/3/action/datastore_search). Ships typed responses, resource IDs, and query helpers for common lookups.
 
