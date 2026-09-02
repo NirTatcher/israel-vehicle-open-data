@@ -1,6 +1,6 @@
 # israel-vehicle-open-data
 
-[![npm version](https://img.shields.io/npm/v/israel-vehicle-open-data)](https://www.npmjs.com/package/israel-vehicle-open-data)
+[![npm version](https://img.shields.io/npm/v/israel-vehicle-open-data)](https://www.npmjs.com/package/israel-vehicle-open-data) &nbsp;&nbsp; [![GitHub release](https://img.shields.io/github/v/release/NirTatcher/israel-vehicle-open-data)](https://github.com/NirTatcher/israel-vehicle-open-data/releases)
 
 ![npm](https://img.shields.io/npm/dw/israel-vehicle-open-data) &nbsp;&nbsp; ![npm](https://img.shields.io/npm/dm/israel-vehicle-open-data) &nbsp;&nbsp; ![npm](https://img.shields.io/npm/dy/israel-vehicle-open-data)
 

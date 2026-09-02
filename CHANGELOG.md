@@ -10,8 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `paginateDatastore()` async generator for walking CKAN pages with offset/limit
-- `paginateActivePrivate()` convenience wrapper for the active private registry
+- `paginateActivePrivate()` and `paginateTwoWheelers()` convenience wrappers
 - `fields` parameter on `DatastoreSearchParams` for slimmer page payloads
+- `RESOURCES.twoWheelers`, `TwoWheelerRecord` type, and `searchTwoWheelersByPlate()`
 
 ## [1.0.0] - 2026-07-27
 
@@ -38,5 +39,6 @@ First stable release.
 
 Initial npm publish (superseded by 1.0.0 — same API).
 
+[1.1.0]: https://github.com/NirTatcher/israel-vehicle-open-data/releases/tag/v1.1.0
 [1.0.0]: https://github.com/NirTatcher/israel-vehicle-open-data/releases/tag/v1.0.0
 [0.1.0]: https://github.com/NirTatcher/israel-vehicle-open-data/releases/tag/v0.1.0

@@ -89,10 +89,7 @@ describe('paginateDatastore', () => {
       })),
     )
 
-    await expect(async () => {
-      for await (const _ of paginateDatastore(RESOURCES.activePrivate)) {
-        // drain
-      }
-    }).rejects.toThrow(/datastore_search failed/)
+    const gen = paginateDatastore(RESOURCES.activePrivate)
+    await expect(gen.next()).rejects.toThrow(/datastore_search failed/)
   })
 })
