@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `fields` parameter on `DatastoreSearchParams` for slimmer page payloads
 - `RESOURCES.twoWheelers`, `TwoWheelerRecord` type, and `searchTwoWheelersByPlate()`
 
+### Documentation
+
+- README: full coverage table (all 13 resources), grouped query helpers, pagination opts, TypeScript types, public fleet & two-wheelers
+
 ## [1.0.0] - 2026-07-27
 
 First stable release.

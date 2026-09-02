@@ -13,4 +13,5 @@ export type {
   FinalCancelVehicleRecord,
   DisabledParkingPermitRecord,
   PersonalImportVehicleRecord,
+  TwoWheelerRecord,
 } from './registries.js'

@@ -72,7 +72,7 @@ Pass an optional `AbortSignal` as the last argument on any query to cancel in-fl
 
 There is no single API call for “everything about a car”. A full lookup (as used by [Car check](https://car-check-il.netlify.app/)) typically:
 
-1. **Resolve the vehicle** — try active private registry first; if empty, check public → personal import → inactive → final cancel (in parallel).
+1. **Resolve the vehicle** — try active private registry first; if empty, check public / government fleet → personal import → inactive → final cancel (in parallel). **Motorcycles and scooters** use a separate active registry — call `searchTwoWheelersByPlate` when you expect a two-wheeler (not mixed into the car fallback chain).
 2. **By plate (always)** — outstanding recalls (`searchHagbalatRecallByPlate`).
 3. **By plate (when a record exists)** — disabled parking permit, mileage history, ownership history.
 4. **By model codes from the record** (`tozeret_cd`, `degem_cd`, optional `shnat_yitzur`, `sug_degem`) — WLTP specs, model popularity counts.
@@ -94,6 +94,7 @@ import {
   searchActivePrivateByModel,
   searchActivePrivateByModelYear,
   searchRecallCatalogByRecallId,
+  searchTwoWheelersByPlate,
 } from 'israel-vehicle-open-data'
 
 const plate = 3300421
@@ -195,6 +196,28 @@ node examples/full-plate-lookup.mjs 3300421
 
 Each response is a CKAN envelope — check `response.success` before reading `response.result`. The example script prints aggregated JSON for debugging.
 
+## What's included
+
+The library wraps **13 CKAN resources** on data.gov.il (Ministry of Transport vehicle datasets). Each has a key on `RESOURCES`, typed records where applicable, and one or more query helpers.
+
+| Group | `RESOURCES` key | Plate lookup helper | Notes |
+|-------|-----------------|---------------------|-------|
+| **Active — private & commercial cars** | `activePrivate` | `searchActivePrivateByPlate` | Main registry (~4M vehicles). Also `searchActivePrivate`, model count helpers. |
+| **Active — public / government fleet** | `publicVehicles` | `searchPublicVehicleByPlate` | Buses, taxis, municipal & gov vehicles (כלי רכב ציבוריים). |
+| **Active — two-wheelers** | `twoWheelers` | `searchTwoWheelersByPlate` | Motorcycles, scooters, trikes (דו-גלגליים). Separate registry from cars. |
+| **Active — personal import** | `personalImport` | `searchPersonalImportByPlate` | Personally imported vehicles still on the road. |
+| **Inactive — with model code** | `inactiveWithModel` | `searchInactiveWithModelByPlate` | Off-road / deregistered, includes `degem_cd`. |
+| **Inactive — without model code** | `inactiveWithoutModel` | `searchInactiveWithoutModelByPlate` | Off-road, sparse model fields. |
+| **Inactive — final cancellation** | `finalCancel` | `searchFinalCancelByPlate` | Plate-only rows (minimal fields). |
+| **Specs / WLTP** | `wltp` | — | `searchWltpByModel({ tozeret_cd, degem_cd, … })` |
+| **History — mileage** | `privateHistoryMileage` | `searchPrivateHistoryMileageByPlate` | Last reported odometer reading. |
+| **History — ownership** | `privateOwnership` | `searchPrivateOwnershipByPlate` | Ownership changes, newest first (`limit: 100`). |
+| **Recalls — outstanding** | `hagbalatRecall` | `searchHagbalatRecallByPlate` | Filter field `MISPAR_RECHEV` (uppercase). |
+| **Recalls — catalog** | `recallCatalog` | — | `searchRecallCatalogByRecallId(recallId)` |
+| **Permits — disabled parking** | `disabledParkingPermit` | `searchDisabledParkingPermitByPlate` | Filter key `"MISPAR RECHEV"` (with space). |
+
+For **batch scans** (stats, exports), use `paginateDatastore(resource_id, opts)` or the wrappers `paginateActivePrivate` / `paginateTwoWheelers`. Any resource can be paginated — only those two have convenience wrappers today.
+
 ## How it works
 
 Responses match the official CKAN JSON shape (`success`, `result`, `error`). The library does not retry failed requests, throw on `success: false`, or unwrap records — you handle the envelope the same way you would with a direct API call.
@@ -203,35 +226,67 @@ Responses match the official CKAN JSON shape (`success`, `result`, `error`). The
 
 | Export | Description |
 |--------|-------------|
-| `datastoreSearch(params, signal?)` | Any `datastore_search` call → `DatastoreSearchResponse<T>` |
+| `datastoreSearch(params, signal?)` | Any `datastore_search` call → `DatastoreSearchResponse<T>`. Params: `resource_id`, `offset`, `limit`, `filters`, `sort`, `q`, **`fields`**. |
 | `buildDatastoreSearchUrl(params)` | URL builder (encodes `filters` once — do not pre-encode JSON) |
-| `paginateDatastore(resource_id, opts?)` | Async generator over CKAN pages (`limit`, `offset`, `fields`, `maxPages`) |
-| `paginateActivePrivate(opts?)` | Same for `RESOURCES.activePrivate` |
-| `paginateTwoWheelers(opts?)` | Same for `RESOURCES.twoWheelers` |
+| `paginateDatastore(resource_id, opts?)` | Async generator over CKAN pages. Throws if `success: false`. |
+| `paginateActivePrivate(opts?)` | `paginateDatastore` for `RESOURCES.activePrivate` → `CarRecord` pages |
+| `paginateTwoWheelers(opts?)` | `paginateDatastore` for `RESOURCES.twoWheelers` → `TwoWheelerRecord` pages |
 | `DATASTORE_SEARCH_URL` | Base CKAN endpoint URL |
-| `RESOURCES` | Known dataset resource IDs |
+| `RESOURCES` | Known dataset resource IDs (`ResourceKey` type) |
+
+**Pagination options** (`PaginateDatastoreOpts`):
+
+| Option | CKAN param | Default | Description |
+|--------|------------|---------|-------------|
+| `limit` | `limit` | `1000` | Records per page |
+| `fields` | `fields` | — | Comma-separated columns (smaller payloads; must match resource schema) |
+| `filters` | `filters` | — | JSON filter string |
+| `sort` | `sort` | — | Sort expression |
+| `q` | `q` | — | Full-text query |
+| `maxPages` | — | unlimited | Stop after N pages (tests / partial scans) |
+| `signal` | — | — | `AbortSignal` to cancel |
+
+Each yielded **`PaginatePage<T>`**: `{ records, offset, total, pageIndex }`.
 
 ### Query helpers
 
-Each helper pre-fills `resource_id` and common `filters`, and returns the same CKAN envelope as `datastoreSearch`.
+Each helper pre-fills `resource_id` and common `filters`, and returns the same CKAN envelope as `datastoreSearch`. Optional **`AbortSignal`** as the last argument on all helpers.
+
+#### Active registries
 
 | Function | Filter key(s) | Notes |
 |----------|---------------|-------|
-| `searchActivePrivate(opts?)` | custom | Paginate active private registry |
-| `searchActivePrivateByPlate(plate)` | `mispar_rechev` | Main plate lookup |
-| `searchActivePrivateByModel({ tozeret_cd, degem_cd })` | model codes | `limit: 0` (count) |
-| `searchActivePrivateByModelYear({ …, shnat_yitzur })` | model + year | `limit: 0` (count) |
-| `searchPublicVehicleByPlate(plate)` | `mispar_rechev` | Public / gov vehicles |
-| `searchPersonalImportByPlate(plate)` | `mispar_rechev` | Personal import |
-| `searchInactiveWithModelByPlate(plate)` | `mispar_rechev` | Inactive, with model |
-| `searchInactiveWithoutModelByPlate(plate)` | `mispar_rechev` | Inactive, without model |
-| `searchFinalCancelByPlate(plate)` | `mispar_rechev` | Final cancellation |
-| `searchHagbalatRecallByPlate(plate)` | `MISPAR_RECHEV` | Outstanding recalls (uppercase field) |
-| `searchRecallCatalogByRecallId(recallId)` | `RECALL_ID` | Recall campaign catalog |
-| `searchWltpByModel({ tozeret_cd, degem_cd, … })` | model codes | WLTP / specs |
+| `searchActivePrivate(opts?)` | custom | Low-level search on active private registry (`offset`, `limit`, `filters`, …) |
+| `searchActivePrivateByPlate(plate)` | `mispar_rechev` | Main car/truck plate lookup |
+| `searchActivePrivateByModel({ tozeret_cd, degem_cd })` | model codes | `limit: 0` (count only) |
+| `searchActivePrivateByModelYear({ …, shnat_yitzur })` | model + year | `limit: 0` (count only) |
+| `searchPublicVehicleByPlate(plate)` | `mispar_rechev` | Public / government fleet (buses, taxis, municipal) |
+| `searchTwoWheelersByPlate(plate)` | `mispar_rechev` | Motorcycles, scooters, trikes |
+| `searchPersonalImportByPlate(plate)` | `mispar_rechev` | Personal import vehicles |
+
+#### Inactive / historical registries
+
+| Function | Filter key(s) | Notes |
+|----------|---------------|-------|
+| `searchInactiveWithModelByPlate(plate)` | `mispar_rechev` | Inactive, with model code |
+| `searchInactiveWithoutModelByPlate(plate)` | `mispar_rechev` | Inactive, without model code |
+| `searchFinalCancelByPlate(plate)` | `mispar_rechev` | Final cancellation (plate-only rows) |
+
+#### Enrichment & specs
+
+| Function | Filter key(s) | Notes |
+|----------|---------------|-------|
+| `searchWltpByModel({ tozeret_cd, degem_cd, … })` | model codes | WLTP / technical specs (optional year, trim) |
 | `searchPrivateHistoryMileageByPlate(plate)` | `mispar_rechev` | Last reported mileage |
-| `searchPrivateOwnershipByPlate(plate)` | `mispar_rechev` | Ownership history, newest first |
-| `searchDisabledParkingPermitByPlate(plate)` | `"MISPAR RECHEV"` | Space in field name |
+| `searchPrivateOwnershipByPlate(plate)` | `mispar_rechev` | Ownership history, newest first (`limit: 100`) |
+
+#### Recalls & permits
+
+| Function | Filter key(s) | Notes |
+|----------|---------------|-------|
+| `searchHagbalatRecallByPlate(plate)` | `MISPAR_RECHEV` | Outstanding recalls (uppercase field) |
+| `searchRecallCatalogByRecallId(recallId)` | `RECALL_ID` | Recall campaign catalog entry |
+| `searchDisabledParkingPermitByPlate(plate)` | `"MISPAR RECHEV"` | Disabled parking permit (space in field name) |
 
 Custom query example:
 
@@ -245,40 +300,74 @@ await datastoreSearch({
 })
 ```
 
+Slimmer payloads with **`fields`** (only request columns that exist on that resource):
+
+```js
+await datastoreSearch({
+  resource_id: RESOURCES.twoWheelers,
+  limit: 1,
+  fields: 'mispar_rechev,tozeret_nm,degem_nm,shnat_yitzur,sug_rechev_nm',
+})
+```
+
 Scan an entire registry (e.g. for batch stats):
 
 ```js
-import { paginateActivePrivate } from 'israel-vehicle-open-data'
+import { paginateActivePrivate, paginateTwoWheelers } from 'israel-vehicle-open-data'
 
-let total = 0
-for await (const page of paginateActivePrivate({ limit: 32_000 })) {
-  for (const record of page.records) {
-    // aggregate …
-  }
-  total += page.records.length
-  if (page.total !== null) console.log(`${total} / ${page.total}`)
+// Cars — large page size for fewer round trips
+for await (const page of paginateActivePrivate({ limit: 32_000, fields: 'tozeret_cd,degem_cd,…' })) {
+  console.log(page.pageIndex, page.records.length, page.total)
+}
+
+// Two-wheelers — note: no degem_cd on this resource; use degem_nm for display
+for await (const page of paginateTwoWheelers({ limit: 32_000 })) {
+  // aggregate …
 }
 ```
+
+### TypeScript types
+
+All record types are exported from the package root (`import type { CarRecord, … } from 'israel-vehicle-open-data'`):
+
+| Type | Dataset |
+|------|---------|
+| `CarRecord` | Active private / commercial |
+| `PublicVehicleRecord` | Public / government fleet |
+| `TwoWheelerRecord` | Active two-wheelers |
+| `PersonalImportVehicleRecord` | Personal import |
+| `InactiveVehicleWithModelRecord` | Inactive (with model) |
+| `InactiveVehicleWithoutModelRecord` | Inactive (without model) |
+| `FinalCancelVehicleRecord` | Final cancellation |
+| `WltpSpecRecord` | WLTP specs |
+| `PrivateVehicleHistoryMileageRecord` | Mileage history |
+| `PrivateVehicleOwnershipRecord` | Ownership history |
+| `HagbalatRecallRecord` | Outstanding recalls |
+| `RecallCatalogRecord` | Recall catalog |
+| `DisabledParkingPermitRecord` | Disabled parking permit |
+| `DatastoreSearchResponse<T>` | CKAN envelope wrapper |
+
+Also: `DatastoreSearchParams`, `PaginateDatastoreOpts`, `PaginatePage<T>`, `ResourceKey`.
 
 ## Datasets (`RESOURCES`)
 
 Each `RESOURCES` key maps to a CKAN `resource_id`. Links point to the dataset page on data.gov.il (Ministry of Transport).
 
-| Key | `resource_id` | Dataset on data.gov.il |
-|-----|---------------|------------------------|
-| `activePrivate` | `053cea08-09bc-40ec-8f7a-156f0677aff3` | [private-and-commercial-vehicles](https://data.gov.il/he/datasets/ministry_of_transport/private-and-commercial-vehicles) |
-| `publicVehicles` | `cf29862d-ca25-4691-84f6-1be60dcb4a1e` | [kli_rechev_ciburiim](https://data.gov.il/he/datasets/ministry_of_transport/kli_rechev_ciburiim) |
-| `personalImport` | `03adc637-b6fe-402b-9937-7c3d3afc9140` | [personal_import_vehicles](https://data.gov.il/he/datasets/ministry_of_transport/personal_import_vehicles) |
-| `inactiveWithModel` | `f6efe89a-fb3d-43a4-bb61-9bf12a9b9099` | [rechev_le_pail_with_degem](https://data.gov.il/he/datasets/ministry_of_transport/rechev_le_pail_with_degem) |
-| `inactiveWithoutModel` | `6f6acd03-f351-4a8f-8ecf-df792f4f573a` | [rechev_le_pail_without-degem](https://data.gov.il/he/datasets/ministry_of_transport/rechev_le_pail_without-degem) |
-| `finalCancel` | `851ecab1-0622-4dbe-a6c7-f950cf82abf9` | [reshev_bitul_sofi](https://data.gov.il/he/datasets/ministry_of_transport/reshev_bitul_sofi) |
-| `disabledParkingPermit` | `c8b9f9c8-4612-4068-934f-d4acd2e3c06e` | [rechev-tag-nachim](https://data.gov.il/he/datasets/ministry_of_transport/rechev-tag-nachim) |
-| `hagbalatRecall` | `36bf1404-0be4-49d2-82dc-2f1ead4a8b93` | [hagbalat_recall](https://data.gov.il/he/datasets/ministry_of_transport/hagbalat_recall) |
-| `recallCatalog` | `2c33523f-87aa-44ec-a736-edbb0a82975e` | [recall](https://data.gov.il/he/datasets/ministry_of_transport/recall) |
-| `wltp` | `142afde2-6228-49f9-8a29-9b6c3a0cbe40` | [degem-rechev-wltp](https://data.gov.il/he/datasets/ministry_of_transport/degem-rechev-wltp) |
-| `privateHistoryMileage` | `56063a99-8a3e-4ff4-912e-5966c0279bad` | [shinui_mivne](https://data.gov.il/he/datasets/ministry_of_transport/shinui_mivne) (mileage resource) |
-| `privateOwnership` | `bb2355dc-9ec7-4f06-9c3f-3344672171da` | [shinui_mivne](https://data.gov.il/he/datasets/ministry_of_transport/shinui_mivne) (ownership resource) |
-| `twoWheelers` | `bf9df4e2-d90d-4c0a-a400-19e15af8e95f` | [two-wheeled vehicles](https://data.gov.il/he/datasets/ministry_of_transport/two-wheeled-vehicles) |
+| Key | Registry | `resource_id` | Dataset on data.gov.il |
+|-----|----------|---------------|------------------------|
+| `activePrivate` | Private & commercial vehicles (active) | `053cea08-09bc-40ec-8f7a-156f0677aff3` | [private-and-commercial-vehicles](https://data.gov.il/he/datasets/ministry_of_transport/private-and-commercial-vehicles) |
+| `publicVehicles` | Public / government fleet (buses, taxis, municipal) | `cf29862d-ca25-4691-84f6-1be60dcb4a1e` | [kli_rechev_ciburiim](https://data.gov.il/he/datasets/ministry_of_transport/kli_rechev_ciburiim) |
+| `twoWheelers` | Motorcycles, scooters, trikes (active) | `bf9df4e2-d90d-4c0a-a400-19e15af8e95f` | [two-wheeled vehicles](https://data.gov.il/he/datasets/ministry_of_transport/two-wheeled-vehicles) |
+| `personalImport` | Personal import (active) | `03adc637-b6fe-402b-9937-7c3d3afc9140` | [personal_import_vehicles](https://data.gov.il/he/datasets/ministry_of_transport/personal_import_vehicles) |
+| `inactiveWithModel` | Inactive — with model code | `f6efe89a-fb3d-43a4-bb61-9bf12a9b9099` | [rechev_le_pail_with_degem](https://data.gov.il/he/datasets/ministry_of_transport/rechev_le_pail_with_degem) |
+| `inactiveWithoutModel` | Inactive — without model code | `6f6acd03-f351-4a8f-8ecf-df792f4f573a` | [rechev_le_pail_without-degem](https://data.gov.il/he/datasets/ministry_of_transport/rechev_le_pail_without-degem) |
+| `finalCancel` | Final cancellation | `851ecab1-0622-4dbe-a6c7-f950cf82abf9` | [reshev_bitul_sofi](https://data.gov.il/he/datasets/ministry_of_transport/reshev_bitul_sofi) |
+| `disabledParkingPermit` | Disabled parking permit | `c8b9f9c8-4612-4068-934f-d4acd2e3c06e` | [rechev-tag-nachim](https://data.gov.il/he/datasets/ministry_of_transport/rechev-tag-nachim) |
+| `hagbalatRecall` | Outstanding recall compliance | `36bf1404-0be4-49d2-82dc-2f1ead4a8b93` | [hagbalat_recall](https://data.gov.il/he/datasets/ministry_of_transport/hagbalat_recall) |
+| `recallCatalog` | Recall campaign catalog | `2c33523f-87aa-44ec-a736-edbb0a82975e` | [recall](https://data.gov.il/he/datasets/ministry_of_transport/recall) |
+| `wltp` | WLTP / model specs | `142afde2-6228-49f9-8a29-9b6c3a0cbe40` | [degem-rechev-wltp](https://data.gov.il/he/datasets/ministry_of_transport/degem-rechev-wltp) |
+| `privateHistoryMileage` | Mileage history | `56063a99-8a3e-4ff4-912e-5966c0279bad` | [shinui_mivne](https://data.gov.il/he/datasets/ministry_of_transport/shinui_mivne) (mileage resource) |
+| `privateOwnership` | Ownership history | `bb2355dc-9ec7-4f06-9c3f-3344672171da` | [shinui_mivne](https://data.gov.il/he/datasets/ministry_of_transport/shinui_mivne) (ownership resource) |
 
 ## Related links
 
