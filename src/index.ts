@@ -13,6 +13,7 @@ export {
 export {
   paginateActivePrivate,
   paginateDatastore,
+  paginateHeavyTrucks,
   paginateTwoWheelers,
   type PaginateDatastoreOpts,
   type PaginatePage,
@@ -28,6 +29,7 @@ export {
   searchPrivateOwnershipByPlate,
   searchPublicVehicleByPlate,
   searchTwoWheelersByPlate,
+  searchHeavyTruckByPlate,
   searchPersonalImportByPlate,
   searchInactiveWithModelByPlate,
   searchInactiveWithoutModelByPlate,

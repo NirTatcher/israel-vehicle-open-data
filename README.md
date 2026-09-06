@@ -198,11 +198,12 @@ Each response is a CKAN envelope — check `response.success` before reading `re
 
 ## What's included
 
-The library wraps **13 CKAN resources** on data.gov.il (Ministry of Transport vehicle datasets). Each has a key on `RESOURCES`, typed records where applicable, and one or more query helpers.
+The library wraps **14 CKAN resources** on data.gov.il (Ministry of Transport vehicle datasets). Each has a key on `RESOURCES`, typed records where applicable, and one or more query helpers.
 
 | Group | `RESOURCES` key | Plate lookup helper | Notes |
 |-------|-----------------|---------------------|-------|
-| **Active — private & commercial cars** | `activePrivate` | `searchActivePrivateByPlate` | Main registry (~4M vehicles). Also `searchActivePrivate`, model count helpers. |
+| **Active — private & commercial cars** | `activePrivate` | `searchActivePrivateByPlate` | Main car registry (~4M vehicles). Heavy trucks are in `heavyTruck`. Also `searchActivePrivate`, model count helpers. |
+| **Active — heavy trucks** | `heavyTruck` | `searchHeavyTruckByPlate` | N2/N3 trucks, trailers, tractors — separate from private/commercial with model code. |
 | **Active — public / government fleet** | `publicVehicles` | `searchPublicVehicleByPlate` | Buses, taxis, municipal & gov vehicles (כלי רכב ציבוריים). |
 | **Active — two-wheelers** | `twoWheelers` | `searchTwoWheelersByPlate` | Motorcycles, scooters, trikes (דו-גלגליים). Separate registry from cars. |
 | **Active — personal import** | `personalImport` | `searchPersonalImportByPlate` | Personally imported vehicles still on the road. |
@@ -216,7 +217,7 @@ The library wraps **13 CKAN resources** on data.gov.il (Ministry of Transport ve
 | **Recalls — catalog** | `recallCatalog` | — | `searchRecallCatalogByRecallId(recallId)` |
 | **Permits — disabled parking** | `disabledParkingPermit` | `searchDisabledParkingPermitByPlate` | Filter key `"MISPAR RECHEV"` (with space). |
 
-For **batch scans** (stats, exports), use `paginateDatastore(resource_id, opts)` or the wrappers `paginateActivePrivate` / `paginateTwoWheelers`. Any resource can be paginated — only those two have convenience wrappers today.
+For **batch scans** (stats, exports), use `paginateDatastore(resource_id, opts)` or the wrappers `paginateActivePrivate`, `paginateTwoWheelers`, and `paginateHeavyTrucks`. Any resource can be paginated — those three have convenience wrappers today.
 
 ## How it works
 
@@ -231,6 +232,7 @@ Responses match the official CKAN JSON shape (`success`, `result`, `error`). The
 | `paginateDatastore(resource_id, opts?)` | Async generator over CKAN pages. Throws if `success: false`. |
 | `paginateActivePrivate(opts?)` | `paginateDatastore` for `RESOURCES.activePrivate` → `CarRecord` pages |
 | `paginateTwoWheelers(opts?)` | `paginateDatastore` for `RESOURCES.twoWheelers` → `TwoWheelerRecord` pages |
+| `paginateHeavyTrucks(opts?)` | `paginateDatastore` for `RESOURCES.heavyTruck` → `HeavyTruckRecord` pages |
 | `DATASTORE_SEARCH_URL` | Base CKAN endpoint URL |
 | `RESOURCES` | Known dataset resource IDs (`ResourceKey` type) |
 
@@ -261,6 +263,7 @@ Each helper pre-fills `resource_id` and common `filters`, and returns the same C
 | `searchActivePrivateByModel({ tozeret_cd, degem_cd })` | model codes | `limit: 0` (count only) |
 | `searchActivePrivateByModelYear({ …, shnat_yitzur })` | model + year | `limit: 0` (count only) |
 | `searchPublicVehicleByPlate(plate)` | `mispar_rechev` | Public / government fleet (buses, taxis, municipal) |
+| `searchHeavyTruckByPlate(plate)` | `mispar_rechev` | Heavy trucks, trailers, tractors (N2/N3, etc.) |
 | `searchTwoWheelersByPlate(plate)` | `mispar_rechev` | Motorcycles, scooters, trikes |
 | `searchPersonalImportByPlate(plate)` | `mispar_rechev` | Personal import vehicles |
 
@@ -334,6 +337,7 @@ All record types are exported from the package root (`import type { CarRecord, �
 |------|---------|
 | `CarRecord` | Active private / commercial |
 | `PublicVehicleRecord` | Public / government fleet |
+| `HeavyTruckRecord` | Active heavy trucks |
 | `TwoWheelerRecord` | Active two-wheelers |
 | `PersonalImportVehicleRecord` | Personal import |
 | `InactiveVehicleWithModelRecord` | Inactive (with model) |
@@ -357,7 +361,8 @@ Each `RESOURCES` key maps to a CKAN `resource_id`. Links point to the dataset pa
 |-----|----------|---------------|------------------------|
 | `activePrivate` | Private & commercial vehicles (active) | `053cea08-09bc-40ec-8f7a-156f0677aff3` | [private-and-commercial-vehicles](https://data.gov.il/he/datasets/ministry_of_transport/private-and-commercial-vehicles) |
 | `publicVehicles` | Public / government fleet (buses, taxis, municipal) | `cf29862d-ca25-4691-84f6-1be60dcb4a1e` | [kli_rechev_ciburiim](https://data.gov.il/he/datasets/ministry_of_transport/kli_rechev_ciburiim) |
-| `twoWheelers` | Motorcycles, scooters, trikes (active) | `bf9df4e2-d90d-4c0a-a400-19e15af8e95f` | [two-wheeled vehicles](https://data.gov.il/he/datasets/ministry_of_transport/two-wheeled-vehicles) |
+| `heavyTruck` | Heavy trucks & vehicles without model code | `cd3acc5c-03c3-4c89-9c54-d40f93c0d790` | [heavy-truck](https://data.gov.il/he/datasets/ministry_of_transport/heavy-truck) |
+| `twoWheelers` | Motorcycles, scooters, trikes (active) | `bf9df4e2-d90d-4c0a-a400-19e15af8e95f` | [motorcycle](https://data.gov.il/he/datasets/ministry_of_transport/motorcycle) |
 | `personalImport` | Personal import (active) | `03adc637-b6fe-402b-9937-7c3d3afc9140` | [personal_import_vehicles](https://data.gov.il/he/datasets/ministry_of_transport/personal_import_vehicles) |
 | `inactiveWithModel` | Inactive — with model code | `f6efe89a-fb3d-43a4-bb61-9bf12a9b9099` | [rechev_le_pail_with_degem](https://data.gov.il/he/datasets/ministry_of_transport/rechev_le_pail_with_degem) |
 | `inactiveWithoutModel` | Inactive — without model code | `6f6acd03-f351-4a8f-8ecf-df792f4f573a` | [rechev_le_pail_without-degem](https://data.gov.il/he/datasets/ministry_of_transport/rechev_le_pail_without-degem) |

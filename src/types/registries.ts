@@ -134,3 +134,22 @@ export type TwoWheelerRecord = {
 
   [key: string]: unknown
 }
+
+export type HeavyTruckRecord = {
+  _id: number
+  mispar_rechev: number
+  mispar_shilda: string | null
+  tkina_EU: string | null
+  shnat_yitzur: number | null
+  tozeret_cd: number | null
+  tozeret_nm: string | null
+  tozeret_eretz_nm: string | null
+  degem_nm: string | null
+  sug_delek_nm: string | null
+  moed_aliya_lakvish: string | null
+  mishkal_kolel: number | null
+  zmig_kidmi: string | null
+  zmig_ahori: string | null
+
+  [key: string]: unknown
+}

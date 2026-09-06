@@ -1,7 +1,7 @@
 import { datastoreSearch } from './datastore.js'
 import { RESOURCES } from './constants.js'
 import type { CarRecord } from './types/datastore.js'
-import type { TwoWheelerRecord } from './types/registries.js'
+import type { TwoWheelerRecord, HeavyTruckRecord } from './types/registries.js'
 
 export type PaginateDatastoreOpts = {
   /** Records per page (CKAN `limit`). Default 1000. */
@@ -97,4 +97,11 @@ export function paginateTwoWheelers(
   opts: PaginateDatastoreOpts = {},
 ): AsyncGenerator<PaginatePage<TwoWheelerRecord>, void, undefined> {
   return paginateDatastore<TwoWheelerRecord>(RESOURCES.twoWheelers, opts)
+}
+
+/** Paginate the active heavy-truck registry. */
+export function paginateHeavyTrucks(
+  opts: PaginateDatastoreOpts = {},
+): AsyncGenerator<PaginatePage<HeavyTruckRecord>, void, undefined> {
+  return paginateDatastore<HeavyTruckRecord>(RESOURCES.heavyTruck, opts)
 }

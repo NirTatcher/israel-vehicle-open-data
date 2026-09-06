@@ -12,6 +12,7 @@ import {
   searchDisabledParkingPermitByPlate,
   searchFinalCancelByPlate,
   searchHagbalatRecallByPlate,
+  searchHeavyTruckByPlate,
   searchInactiveWithModelByPlate,
   searchInactiveWithoutModelByPlate,
   searchPersonalImportByPlate,
@@ -19,6 +20,7 @@ import {
   searchPrivateOwnershipByPlate,
   searchPublicVehicleByPlate,
   searchRecallCatalogByRecallId,
+  searchTwoWheelersByPlate,
   searchWltpByModel,
   searchActivePrivateByModel,
   searchActivePrivateByModelYear,
@@ -52,17 +54,21 @@ async function resolveVehicle(plateNumber, signal) {
     return { source: 'active-private', record: active, fallbacks: {} }
   }
 
-  const [pub, personal, inWith, inWithout, finalCancel] = await Promise.all([
+  const [heavy, pub, twoWheel, personal, inWith, inWithout, finalCancel] = await Promise.all([
+    searchHeavyTruckByPlate(plateNumber, signal).then(firstRecord),
     searchPublicVehicleByPlate(plateNumber, signal).then(firstRecord),
+    searchTwoWheelersByPlate(plateNumber, signal).then(firstRecord),
     searchPersonalImportByPlate(plateNumber, signal).then(firstRecord),
     searchInactiveWithModelByPlate(plateNumber, signal).then(firstRecord),
     searchInactiveWithoutModelByPlate(plateNumber, signal).then(firstRecord),
     searchFinalCancelByPlate(plateNumber, signal).then(firstRecord),
   ])
 
-  const fallbacks = { pub, personal, inWith, inWithout, finalCancel }
+  const fallbacks = { heavy, pub, twoWheel, personal, inWith, inWithout, finalCancel }
 
+  if (heavy) return { source: 'heavy-truck', record: heavy, fallbacks }
   if (pub) return { source: 'public', record: pub, fallbacks }
+  if (twoWheel) return { source: 'two-wheeler', record: twoWheel, fallbacks }
   if (personal) return { source: 'personal-import', record: personal, fallbacks }
   if (inWith) return { source: 'inactive-with-model', record: inWith, fallbacks }
   if (inWithout) return { source: 'inactive-without-model', record: inWithout, fallbacks }

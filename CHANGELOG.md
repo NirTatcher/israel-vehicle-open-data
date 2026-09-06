@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-09-06
+
+### Added
+
+- `RESOURCES.heavyTruck` — active heavy trucks / vehicles without model code (N2/N3, trailers, tractors)
+- `HeavyTruckRecord` type, `searchHeavyTruckByPlate()`, and `paginateHeavyTrucks()`
+
+### Documentation
+
+- README: heavy-truck registry in coverage tables
+- `examples/full-plate-lookup.mjs`: heavy-truck and two-wheeler fallback chain (aligned with Car check)
+
 ## [1.1.1] - 2026-09-02
 
 ### Changed
@@ -49,6 +61,7 @@ First stable release.
 
 Initial npm publish (superseded by 1.0.0 — same API).
 
+[1.2.0]: https://github.com/NirTatcher/israel-vehicle-open-data/releases/tag/v1.2.0
 [1.1.1]: https://github.com/NirTatcher/israel-vehicle-open-data/releases/tag/v1.1.1
 [1.1.0]: https://github.com/NirTatcher/israel-vehicle-open-data/releases/tag/v1.1.0
 [1.0.0]: https://github.com/NirTatcher/israel-vehicle-open-data/releases/tag/v1.0.0

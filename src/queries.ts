@@ -16,6 +16,7 @@ import type {
   PersonalImportVehicleRecord,
   PublicVehicleRecord,
   TwoWheelerRecord,
+  HeavyTruckRecord,
 } from './types/registries.js'
 
 type SearchOpts = {
@@ -158,6 +159,14 @@ export function searchTwoWheelersByPlate(
   signal?: AbortSignal,
 ): Promise<DatastoreSearchResponse<TwoWheelerRecord>> {
   return searchByPlate<TwoWheelerRecord>(RESOURCES.twoWheelers, plate, signal)
+}
+
+/** Active heavy-truck registry by plate (N2/N3, trailers, tractors). */
+export function searchHeavyTruckByPlate(
+  plate: number,
+  signal?: AbortSignal,
+): Promise<DatastoreSearchResponse<HeavyTruckRecord>> {
+  return searchByPlate<HeavyTruckRecord>(RESOURCES.heavyTruck, plate, signal)
 }
 
 /** Personal import registry by plate. */
