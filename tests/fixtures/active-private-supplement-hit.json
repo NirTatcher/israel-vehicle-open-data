@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "result": {
+    "include_total": true,
+    "limit": 1,
+    "offset": 0,
+    "records_format": "objects",
+    "resource_id": "0866573c-40cd-4ca8-91d2-9dd2d7a492e5",
+    "total": 1,
+    "total_estimation_threshold": null,
+    "records": [
+      {
+        "_id": 1,
+        "mispar_rechev": 3300421,
+        "tozeret_cd": 728,
+        "sug_degem": "P",
+        "degem_cd": 3,
+        "kod_omes_tzmig_kidmi": 104,
+        "kod_omes_tzmig_ahori": 104,
+        "kod_mehirut_tzmig_kidmi": "H",
+        "kod_mehirut_tzmig_ahori": "H",
+        "grira_nm": "אין וו גרירה"
+      }
+    ]
+  }
+}

@@ -8,6 +8,11 @@ export const DATASTORE_SEARCH_URL = 'https://data.gov.il/api/3/action/datastore_
 export const RESOURCES = {
   /** Active private vehicle registry (main lookup). */
   activePrivate: '053cea08-09bc-40ec-8f7a-156f0677aff3',
+  /**
+   * Same fleet — tire load/speed codes + tow hitch (`grira_nm`). Join on `mispar_rechev` (and model codes).
+   * @see https://data.gov.il/he/datasets/ministry_of_transport/private-and-commercial-vehicles/0866573c-40cd-4ca8-91d2-9dd2d7a492e5
+   */
+  activePrivateTireAndTow: '0866573c-40cd-4ca8-91d2-9dd2d7a492e5',
   wltp: '142afde2-6228-49f9-8a29-9b6c3a0cbe40',
   privateHistoryMileage: '56063a99-8a3e-4ff4-912e-5966c0279bad',
   privateOwnership: 'bb2355dc-9ec7-4f06-9c3f-3344672171da',

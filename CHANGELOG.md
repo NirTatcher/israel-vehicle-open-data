@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-10-26
+
+### Added
+
+- `RESOURCES.activePrivateTireAndTow` — MoT supplement resource (`0866573c-…`) with `grira_nm` (tow hitch) and tire load/speed codes
+- `ActivePrivateTireTowRecord` type and `searchActivePrivateTireAndTowByPlate()`
+- `mergeActivePrivateWithTireTow()` helper
+- `searchActivePrivateByPlate()` now merges tire/tow fields from the supplement in parallel (one extra CKAN call)
+- Optional live integration tests: `npm run test:live` (`LIVE_API=1`)
+
+### Changed
+
+- `CarRecord` documents optional `grira_nm` and `kod_*_tzmig_*` fields when supplement is merged
+
 ## [1.2.0] - 2026-09-06
 
 ### Added

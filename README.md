@@ -50,7 +50,7 @@ if (!response.success) {
   console.error(response.error)
 } else {
   const record = response.result?.records[0]
-  console.log(record?.tozeret_nm, record?.degem_nm)
+  console.log(record?.tozeret_nm, record?.degem_nm, record?.grira_nm)
 }
 ```
 
@@ -198,11 +198,12 @@ Each response is a CKAN envelope — check `response.success` before reading `re
 
 ## What's included
 
-The library wraps **14 CKAN resources** on data.gov.il (Ministry of Transport vehicle datasets). Each has a key on `RESOURCES`, typed records where applicable, and one or more query helpers.
+The library wraps **15 CKAN resources** on data.gov.il (Ministry of Transport vehicle datasets). Each has a key on `RESOURCES`, typed records where applicable, and one or more query helpers.
 
 | Group | `RESOURCES` key | Plate lookup helper | Notes |
 |-------|-----------------|---------------------|-------|
-| **Active — private & commercial cars** | `activePrivate` | `searchActivePrivateByPlate` | Main car registry (~4M vehicles). Heavy trucks are in `heavyTruck`. Also `searchActivePrivate`, model count helpers. |
+| **Active — private & commercial cars** | `activePrivate` | `searchActivePrivateByPlate` | Main car registry (`053cea08-…`, ~4M). `searchActivePrivateByPlate` also merges tire/tow fields from `activePrivateTireAndTow`. Heavy trucks are in `heavyTruck`. |
+| **Active — private supplement** | `activePrivateTireAndTow` | `searchActivePrivateTireAndTowByPlate` | Same fleet (`0866573c-…`): `grira_nm` (tow hitch), tire load/speed codes. Usually used via merged plate lookup. |
 | **Active — heavy trucks** | `heavyTruck` | `searchHeavyTruckByPlate` | N2/N3 trucks, trailers, tractors — separate from private/commercial with model code. |
 | **Active — public / government fleet** | `publicVehicles` | `searchPublicVehicleByPlate` | Buses, taxis, municipal & gov vehicles (כלי רכב ציבוריים). |
 | **Active — two-wheelers** | `twoWheelers` | `searchTwoWheelersByPlate` | Motorcycles, scooters, trikes (דו-גלגליים). Separate registry from cars. |

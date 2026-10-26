@@ -1,4 +1,5 @@
 export type { DatastoreSearchResponse, CarRecord } from './datastore.js'
+export type { ActivePrivateTireTowRecord } from './active-private-supplement.js'
 export type {
   WltpSpecRecord,
   PrivateVehicleHistoryMileageRecord,

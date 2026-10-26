@@ -40,6 +40,13 @@ export type CarRecord = {
   moed_aliya_lakvish: string | null
   kinuy_mishari: string | null
 
+  /** Tow hitch / trailer coupling — from `activePrivateTireAndTow` supplement when merged. */
+  grira_nm?: string | null
+  kod_omes_tzmig_kidmi?: number | null
+  kod_omes_tzmig_ahori?: number | null
+  kod_mehirut_tzmig_kidmi?: string | null
+  kod_mehirut_tzmig_ahori?: string | null
+
   /**
    * Extra unknown keys are allowed because the dataset may add fields over time.
    */

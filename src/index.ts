@@ -19,9 +19,12 @@ export {
   type PaginatePage,
 } from './pagination.js'
 
+export { mergeActivePrivateWithTireTow } from './active-private-merge.js'
+
 export {
   searchActivePrivate,
   searchActivePrivateByPlate,
+  searchActivePrivateTireAndTowByPlate,
   searchActivePrivateByModel,
   searchActivePrivateByModelYear,
   searchWltpByModel,

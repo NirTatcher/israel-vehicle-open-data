@@ -1,5 +1,7 @@
+import { mergeActivePrivateWithTireTow } from './active-private-merge.js'
 import { RESOURCES } from './constants.js'
 import { datastoreSearch } from './datastore.js'
+import type { ActivePrivateTireTowRecord } from './types/active-private-supplement.js'
 import type { CarRecord, DatastoreSearchResponse } from './types/datastore.js'
 import type {
   HagbalatRecallRecord,
@@ -55,12 +57,44 @@ export function searchActivePrivate(
   return search<CarRecord>(RESOURCES.activePrivate, opts)
 }
 
-/** Active private registry lookup by plate (`mispar_rechev`). */
-export function searchActivePrivateByPlate(
+/** Tire/tow supplement registry by plate (`mispar_rechev`). */
+export function searchActivePrivateTireAndTowByPlate(
+  plate: number,
+  signal?: AbortSignal,
+): Promise<DatastoreSearchResponse<ActivePrivateTireTowRecord>> {
+  return searchByPlate<ActivePrivateTireTowRecord>(
+    RESOURCES.activePrivateTireAndTow,
+    plate,
+    signal,
+  )
+}
+
+/**
+ * Active private registry lookup by plate (`mispar_rechev`).
+ * Merges {@link RESOURCES.activePrivateTireAndTow} fields (`grira_nm`, tire codes) when present.
+ */
+export async function searchActivePrivateByPlate(
   plate: number,
   signal?: AbortSignal,
 ): Promise<DatastoreSearchResponse<CarRecord>> {
-  return searchByPlate<CarRecord>(RESOURCES.activePrivate, plate, signal)
+  const [mainRes, supplementRes] = await Promise.all([
+    searchByPlate<CarRecord>(RESOURCES.activePrivate, plate, signal),
+    searchActivePrivateTireAndTowByPlate(plate, signal),
+  ])
+
+  const main = mainRes.result?.records[0] ?? null
+  const supplement = supplementRes.result?.records[0] ?? null
+  const merged = mergeActivePrivateWithTireTow(main, supplement)
+
+  if (!mainRes.result) return mainRes
+
+  return {
+    ...mainRes,
+    result: {
+      ...mainRes.result,
+      records: merged ? [merged] : [],
+    },
+  }
 }
 
 /** Active private registry count for a manufacturer/model pair (`limit: 0`). */

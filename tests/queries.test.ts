@@ -2,27 +2,36 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { searchActivePrivateByPlate, searchHeavyTruckByPlate } from '../src/queries.js'
 import { RESOURCES } from '../src/constants.js'
 import fixture from './fixtures/active-private-hit.json'
+import supplementFixture from './fixtures/active-private-supplement-hit.json'
 
 describe('searchActivePrivateByPlate', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
   })
 
-  it('returns the CKAN response envelope unchanged', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => ({
+  it('merges main registry with tire/tow supplement', async () => {
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      const href = String(url)
+      const body = href.includes(RESOURCES.activePrivateTireAndTow)
+        ? supplementFixture
+        : fixture
+      return {
         ok: true,
         status: 200,
-        text: async () => JSON.stringify(fixture),
-      })),
-    )
+        text: async () => JSON.stringify(body),
+      }
+    })
+    vi.stubGlobal('fetch', fetchMock)
 
     const response = await searchActivePrivateByPlate(3300421)
 
-    expect(response).toEqual(fixture)
     expect(response.success).toBe(true)
-    expect(response.result?.records[0]?.mispar_rechev).toBe(3300421)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    const record = response.result?.records[0]
+    expect(record?.mispar_rechev).toBe(3300421)
+    expect(record?.tozeret_nm).toBe('טויוטה')
+    expect(record?.grira_nm).toBe('אין וו גרירה')
+    expect(record?.kod_mehirut_tzmig_kidmi).toBe('H')
   })
 })
 
