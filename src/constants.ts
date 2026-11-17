@@ -30,6 +30,17 @@ export const RESOURCES = {
   twoWheelers: 'bf9df4e2-d90d-4c0a-a400-19e15af8e95f',
   /** Active heavy trucks and vehicles without model code (N2/N3, trailers, tractors). */
   heavyTruck: 'cd3acc5c-03c3-4c89-9c54-d40f93c0d790',
+  /**
+   * Authorized garages and licensing test stations (מוסכים ומכוני רישוי).
+   * @see https://data.gov.il/he/datasets/ministry_of_transport/musachim
+   */
+  garagesMusachim: 'bb68386a-a331-4bbc-b668-bba2766d517d',
+  /**
+   * Licensed parts/accessories businesses and transport-product manufacturers (סחר, יבוא וייצור מוצרי תעבורה).
+   * One CKAN row per business × licensed activity (`mispar_esek`, `cod_isuk`, `isuk`).
+   * @see https://data.gov.il/he/datasets/ministry_of_transport/batei-esek
+   */
+  transportTradeBusinesses: '42e73a60-7acc-4c5d-b4ec-b0e468a73c51',
 } as const
 
 export type ResourceKey = keyof typeof RESOURCES

@@ -198,7 +198,7 @@ Each response is a CKAN envelope — check `response.success` before reading `re
 
 ## What's included
 
-The library wraps **15 CKAN resources** on data.gov.il (Ministry of Transport vehicle datasets). Each has a key on `RESOURCES`, typed records where applicable, and one or more query helpers.
+The library wraps **17 CKAN resources** on data.gov.il (Ministry of Transport vehicle datasets). Each has a key on `RESOURCES`, typed records where applicable, and one or more query helpers.
 
 | Group | `RESOURCES` key | Plate lookup helper | Notes |
 |-------|-----------------|---------------------|-------|
@@ -217,6 +217,8 @@ The library wraps **15 CKAN resources** on data.gov.il (Ministry of Transport ve
 | **Recalls — outstanding** | `hagbalatRecall` | `searchHagbalatRecallByPlate` | Filter field `MISPAR_RECHEV` (uppercase). |
 | **Recalls — catalog** | `recallCatalog` | — | `searchRecallCatalogByRecallId(recallId)` |
 | **Permits — disabled parking** | `disabledParkingPermit` | `searchDisabledParkingPermitByPlate` | Filter key `"MISPAR RECHEV"` (with space). |
+| **Reference — garages & test stations** | `garagesMusachim` | — | Directory (`musachim`). Multi-row per `mispar_mosah` / specialization — use `paginateDatastore`. |
+| **Reference — parts & transport trade** | `transportTradeBusinesses` | — | Licensed parts/accessories businesses (`batei-esek`). Multi-row per `mispar_esek` / `cod_isuk` — use `paginateDatastore`. |
 
 For **batch scans** (stats, exports), use `paginateDatastore(resource_id, opts)` or the wrappers `paginateActivePrivate`, `paginateTwoWheelers`, and `paginateHeavyTrucks`. Any resource can be paginated — those three have convenience wrappers today.
 
